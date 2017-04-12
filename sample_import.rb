@@ -22,6 +22,10 @@ class AmplitudeImporter
         json_lines = lines.compact.map do |line|
           JSON.parse(line.strip).tap do |json|
             json['time'] = Time.parse(json['event_time']).to_f
+            json['insert_id'] = [
+              json['user_id'],
+              json['event_id']
+            ].map(&:to_s).join('-')
           end
         end
 
