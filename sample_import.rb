@@ -19,7 +19,11 @@ class AmplitudeImporter
     uri = URI.parse(ENDPOINT)
     File.open(filename) do |f|
       f.each_line.lazy.each_slice(10) do |lines|
-        json_lines = lines.compact.map { |line| JSON.parse(line.strip) }
+        json_lines = lines.compact.map do |line|
+          JSON.parse(line.strip).tap do |json|
+            json['time'] = Time.parse(json['event_time']).to_f
+          end
+        end
 
         queue.enqueue_b do
           with_retries(max_tries: 10) do

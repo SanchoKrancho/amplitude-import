@@ -2,9 +2,12 @@
 
 This is a script to backfill data in an Amplitude project based on a project export. See https://amplitude.zendesk.com/hc/en-us/articles/206404358-Self-Data-Backfill-Guide for their primer on the subject.
 
-## USAGE
+It uses https://github.com/fmmfonseca/work_queue to manage a pool of workers
+making batch HTTP requests.
 
-### Preparing data
+## Usage
+
+### Prepare data
 - Export the data you want to import from Amplitude's project detail pane
 - Unzip the data file and concatenate it:
 ```
