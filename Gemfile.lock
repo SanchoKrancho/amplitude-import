@@ -1,0 +1,15 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    retries (0.0.5)
+    work_queue (2.5.4)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  retries
+  work_queue
+
+BUNDLED WITH
+   1.13.6
