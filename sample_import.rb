@@ -4,9 +4,17 @@ require 'logger'
 require 'json'
 require 'work_queue'
 require 'retries'
+require 'addressable/uri'
+require 'time'
+require 'net/http'
+require 'net/https'
 
 unless ENV['API_KEY']
   abort 'Must set API_KEY'
+end
+
+unless ARGV[0]
+  abort 'Must set argv 0'
 end
 
 class AmplitudeImporter
@@ -16,13 +24,11 @@ class AmplitudeImporter
   def run(filename)
     submitted_count = 0
     logger.info "Processing #{filename}"
-    uri = URI.parse(ENDPOINT)
+    uri = Addressable::URI.parse(ENDPOINT)
     File.open(filename) do |f|
       f.each_line.lazy.each_slice(10) do |lines|
         json_lines = lines.compact.map do |line|
           JSON.parse(line.strip).tap do |json|
-            json['time'] = Time.parse(json['event_time']).to_f
-            json['carrier'] = json['device_carrier']
             json['insert_id'] = [
               json['user_id'],
               json['event_id']
@@ -35,9 +41,13 @@ class AmplitudeImporter
             response = Net::HTTP.post_form(
               uri,
               { api_key: API_KEY,
-                event: JSON.generate(json_lines) })
+                event: json_lines.to_json })
             if response.code == '200'
               logger.info "Response completed successfully"
+            elsif response.code == '429'
+              logger.info "Sleeping for 20 secs..."
+              sleep 20
+              raise "retrying"
             else
               msg = "Response failed with #{response.code}: #{response.message}"
               logger.info msg
