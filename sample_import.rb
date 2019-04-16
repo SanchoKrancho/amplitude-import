@@ -13,12 +13,17 @@ unless ENV['API_KEY']
   abort 'Must set API_KEY'
 end
 
+unless ENV['WORKER_COUNT']
+  abort 'Must set WORKER_COUNT'
+end
+
 unless ARGV[0]
   abort 'Must set argv 0'
 end
 
 class AmplitudeImporter
   API_KEY = ENV['API_KEY'].freeze
+  WORKER_COUNT = ENV['WORKER_COUNT'].freeze.to_i
   ENDPOINT = 'https://api.amplitude.com/httpapi'.freeze
 
   def run(filename)
@@ -69,7 +74,7 @@ class AmplitudeImporter
   private
 
   def queue
-    @queue ||= WorkQueue.new(100)
+    @queue ||= WorkQueue.new(WORKER_COUNT)
   end
 
   def logger
